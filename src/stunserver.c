@@ -196,7 +196,7 @@ main(int   argc,
   sockfd = createLocalSocket(AF_INET,
                              (struct sockaddr*)&localAddr,
                              SOCK_DGRAM,
-                             0);
+                             port);
 
   listenConfig.tInst  = clientData;
   listenConfig.socketConfig[0].sockfd = sockfd;
