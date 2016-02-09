@@ -20,6 +20,7 @@
 #include "sockethelper.h"
 #include "utils.h"
 #include "iphelper.h"
+#include "version.h"
 
 #define MYPORT "3478"    /* the port users will be connecting to */
 #define PASSWORD "VOkJxbRl1RmTxUk/WvJxBt"
@@ -174,7 +175,7 @@ main(int   argc,
       printUsage();
       break;
     case 'v':
-      printf("Version 0.1\n");
+      printf("Version %s\n", VERSION_SHORT);
       exit(0);
       break;
     default:

@@ -12,6 +12,7 @@ set (ADDITIONAL_LIBS "")
 #endif( OPENSSL_FOUND )
 
 add_executable ( stunserver
+                 ${version_file}
                  iphelper.c
                  sockethelper.c
                  ip_query.c
