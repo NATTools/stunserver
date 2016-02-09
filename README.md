@@ -38,7 +38,7 @@ first patch.
 
 BSD 2-clause:
 
-Copyright (c) 2015, PAlib AUTHORS
+Copyright (c) 2015, NATTools
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
