@@ -4,13 +4,23 @@
 
 ## prepare CMAKE
 cmake_minimum_required ( VERSION 3.2.0 )
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+include ( Uncrustify )
+include ( GetGitRevisionDescription )
+git_describe(VERSION --tags --dirty=-d)
 
-set ( STUNSERVER_VERSION_MAJOR "0" CACHE STRING "Project major version number")
-set ( STUNSERVER_VERSION_MINOR "1" CACHE STRING "Project minor version number" )
-set ( STUNSERVER_VERSION_PATCH "0" CACHE STRING "Project patch version number" )
+string(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" STUNSERVER_VERSION_MAJOR "${VERSION}")
+string(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" STUNSERVER_VERSION_MINOR "${VERSION}")
+string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" STUNSERVER_VERSION_PATCH "${VERSION}")
+string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+(.*)" "\\1" STUNSERVER_VERSION_SHA1 "${VERSION}")
+
 mark_as_advanced(STUNSERVER_VERSION_MAJOR STUNSERVER_VERSION_MINOR STUNSERVER_VERSION_PATCH)
 
 set ( STUNSERVER_VERSION "${STUNSERVER_VERSION_MAJOR}.${STUNSERVER_VERSION_MINOR}.${STUNSERVER_VERSION_PATCH}" )
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.c.in
+                ${CMAKE_CURRENT_BINARY_DIR}/version.c)
+set(version_file "${CMAKE_CURRENT_BINARY_DIR}/version.c")
 
 project ( "STUNSERVER" VERSION "${STUNSERVER_VERSION}")
 

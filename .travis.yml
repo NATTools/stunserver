@@ -1,0 +1,41 @@
+language: c
+sudo: false
+os:
+  - linux
+  - osx
+
+compiler:
+  - clang
+  - gcc
+env:
+  - COVERAGE=true
+  - COVERAGE=false
+
+matrix:
+  exclude:
+  - os: osx
+    compiler: gcc
+  - compiler: clang
+    env: COVERAGE=true
+  - compiler: gcc
+    env: COVERAGE=false
+
+addons:
+  apt:
+    sources:
+      - george-edison55-precise-backports
+    packages:
+      - cmake
+      - cmake-data
+
+before_install:
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]];
+    then
+    brew update;
+    brew outdated cmake || brew upgrade cmake;
+    fi
+  - export PATH=$HOME/.local/bin:$PATH
+  - pip install cpp-coveralls --user `whoami`
+
+script:
+- ./build.sh all
