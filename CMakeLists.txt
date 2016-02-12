@@ -96,7 +96,8 @@ endif ()
 find_program( MEMORYCHECK_COMMAND valgrind )
 set( MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full" )
 
-install (FILES AUTHORS LICENSE README.md DESTINATION .)
+
+
 
 ## setup packaging
 set ( CPACK_GENERATOR "TGZ" )
@@ -156,7 +157,6 @@ include_directories ( "${install_dir}/include" )
 add_library(stunlib STATIC IMPORTED)
 set_property(TARGET stunlib PROPERTY IMPORTED_LOCATION "${install_dir}/lib/${CMAKE_SHARED_MODULE_PREFIX}stunlib${CMAKE_SHARED_LIBRARY_SUFFIX}")
 add_dependencies(stunlib project_stunlib)
-
 
 
 ## include the parts

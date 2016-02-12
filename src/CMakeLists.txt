@@ -30,6 +30,9 @@ set_target_properties(stunserver PROPERTIES BUILD_WITH_INSTALL_RPATH ON)
 include_directories ( ../include )
 link_directories ( ${CHECK_LIBRARY_DIRS} )
 
+install(CODE "MESSAGE(\"Installing stunserver\")")
+install(TARGETS stunserver EXPORT stunserver DESTINATION bin)
+
 set (crusty_files
      stunserver.c
      iphelper.c
