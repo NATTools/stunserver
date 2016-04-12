@@ -1,18 +1,25 @@
 [![Build Status](https://travis-ci.org/NATTools/stunserver.svg?branch=master)](https://travis-ci.org/NATTools/stunserver)
 [![GitHub version](https://badge.fury.io/gh/NATTools%2Fstunserver.svg)](https://badge.fury.io/gh/NATTools%2Fstunserver)
 # stunserver
-A simple stunserver implementation. Only suitable to test the NATTool libraries.
+
+A simple stunserver implementation. Only suitable to test the NATTool
+libraries. This does not implement the RFC 3489 STUN change IP or change port
+requests that are used to detect the type of NAT.
 
 ## Compiling
 
 `build.sh` does the following
 
-    mkdir build     (hold all of the build files in a separate directory)
-    cd build; cmake (create the makefiles)
-    make            (To build the code)
+    mkdir build         (hold all of the build files in a separate directory)
+    cd build; cmake ..    (create the makefiles)
+    make                (To build the code)
 
-You will end up with a an application you can execute in build/dist/bin/stunserver.
+You will end up with a an application you can execute in
+build/dist/bin/stunserver.
 
+You can run it with a command like
+
+    stunserver -i en0 
 
 ## Development
 
