@@ -1,3 +1,9 @@
+build
+
+# editor artifacts
+.*~
+*~ 
+
 # Object files
 *.o
 *.ko
