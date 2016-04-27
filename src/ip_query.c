@@ -171,6 +171,6 @@ asLookup(char* ip)
 
   }
 
-      free(response);
+  free(response);
   return asNum;
 }

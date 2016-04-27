@@ -133,7 +133,7 @@ socketListenDemux(void* ptr)
     rv = poll(ufds, config->numSockets, -1);
     if (rv == -1)
     {
-        perror("poll");     /* error occurred in poll() */
+      perror("poll");       /* error occurred in poll() */
     }
     else if (rv == 0)
     {
@@ -216,8 +216,9 @@ socketListenDemux(void* ptr)
         else
         {
 
-         /* Nasty hack on osx to ignore not ICMP ports.. */
-          if(i==0 && config->numSockets==2){
+          /* Nasty hack on osx to ignore not ICMP ports.. */
+          if ( (i == 0) && (config->numSockets == 2) )
+          {
             continue;
           }
           /* TODO IPV6..*/

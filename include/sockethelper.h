@@ -24,19 +24,19 @@ struct socketConfig {
 
 
 struct listenConfig {
-  void* tInst;
+  void*               tInst;
   struct socketConfig socketConfig[MAX_LISTEN_SOCKETS];
   int                 numSockets;
   /*Handles normal data like RTP etc */
   void (* icmp_handler)(struct socketConfig*,
-                        struct sockaddr    *,
-                        void               *,
+                        struct sockaddr*,
+                        void*,
                         int);
   /*Handles STUN packet*/
   void (* stun_handler)(struct socketConfig*,
-                        struct sockaddr    *,
-                        void               *,
-                        unsigned char      *,
+                        struct sockaddr*,
+                        void*,
+                        unsigned char*,
                         int);
 };
 
