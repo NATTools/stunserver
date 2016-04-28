@@ -27,7 +27,8 @@ addons:
     packages:
       - cmake
       - cmake-data
-
+      - libbsd-dev
+      
 before_install:
   - if [[ $TRAVIS_OS_NAME == 'osx' ]];
     then

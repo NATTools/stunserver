@@ -2,8 +2,8 @@
 #define VERSION_H
 
 
-//Global version strings
+/* Global version strings */
 extern const char VERSION[];
 extern const char VERSION_SHORT[];
 
-#endif //VERSION_H
+#endif /* VERSION_H */

@@ -33,7 +33,7 @@ getLocalInterFaceAddrs(struct sockaddr* addr,
   if (getifaddrs(&ifaddr) == -1)
   {
     perror("getifaddrs");
-      exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
   }
 
   /* Walk through linked list, maintaining head pointer so we
@@ -166,7 +166,7 @@ getRemoteIpAddr(struct sockaddr* remoteAddr,
 
   for (p = res; p != NULL; p = p->ai_next)
   {
-    //void* addr;
+    /* void* addr; */
     /* get the pointer to the address itself, */
     /* different fields in IPv4 and IPv6: */
     if (p->ai_family == AF_INET)       /* IPv4 */
@@ -178,7 +178,7 @@ getRemoteIpAddr(struct sockaddr* remoteAddr,
                                   ipv4->sin_addr.s_addr,
                                   htons(port) );
       }
-      //addr = &(ipv4->sin_addr);
+      /* addr = &(ipv4->sin_addr); */
     }
     else         /* IPv6 */
     {
@@ -189,7 +189,7 @@ getRemoteIpAddr(struct sockaddr* remoteAddr,
                                   ipv6->sin6_addr.s6_addr,
                                   htons(port) );
       }
-      //addr = &(ipv6->sin6_addr);
+      /* addr = &(ipv6->sin6_addr); */
     }
   }
   freeaddrinfo(res);   /* free the linked list */
