@@ -179,12 +179,12 @@ stunHandler(struct socketConfig* config,
 
 
   uint32_t lastReqCnt  = 0;
-  uint32_t lastRespCnt = 0;
+  //uint32_t lastRespCnt = 0;
 
   if (stunRequest.hasTransCount)
   {
     lastReqCnt  = stunRequest.transCount.reqCnt;
-    lastRespCnt = stunRequest.transCount.respCnt;
+    //lastRespCnt = stunRequest.transCount.respCnt;
   }
   if (lastReqCnt >= upstream_loss)
   {
