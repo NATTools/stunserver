@@ -36,10 +36,11 @@ struct transIDInfo {
   uint32_t  tick;
 };
 uint32_t transIDSinUse;
+uint32_t maxTransIDSinUse = 0;
 
 
 struct transIDInfo transIDs[MAX_TRANS_IDS];
-
+pthread_mutex_t mutexTransId;
 
 
 /*Todo: If we really care protect the variables by a mutex...*/
@@ -61,18 +62,22 @@ transIDCleanup(void* ptr)
       if (transIDs[i].cnt > 12)
       {
         /* To old remove it.. */
+        pthread_mutex_lock (&mutexTransId);
         for (uint32_t j = i + 1; j < transIDSinUse; j++)
         {
           memcpy( &transIDs[j - 1], &transIDs[j], sizeof(struct transIDInfo) );
         }
         transIDSinUse--;
+        pthread_mutex_unlock (&mutexTransId);
       }
       else
       {
+        pthread_mutex_lock (&mutexTransId);
         transIDs[i].cnt++;
+        pthread_mutex_unlock (&mutexTransId);
       }
     }
-    printf("\rActive Transactions: (%i)     ", transIDSinUse);
+    printf("\rActive Transactions: %i  (Max: %i)   ", transIDSinUse, maxTransIDSinUse);
     fflush(stdout);
   }
   return NULL;
@@ -103,14 +108,21 @@ insertTransId(const StunMsgId* id)
   {
     if ( stunlib_transIdIsEqual(id, &transIDs[i].id) )
     {
+      pthread_mutex_lock (&mutexTransId);
       transIDs[i].cnt++;
+      pthread_mutex_unlock (&mutexTransId);
       return transIDs[i].cnt;
     }
   }
+  pthread_mutex_lock (&mutexTransId);
   memcpy( &transIDs[transIDSinUse].id, id, sizeof (StunMsgId) );
   transIDs[transIDSinUse].cnt  = 1;
   transIDs[transIDSinUse].tick = 0;
   transIDSinUse++;
+  if(transIDSinUse>maxTransIDSinUse){
+    maxTransIDSinUse = transIDSinUse;
+  }
+  pthread_mutex_unlock (&mutexTransId);
   return 1;
 }
 
@@ -314,7 +326,7 @@ main(int   argc,
                              (struct sockaddr*)&localAddr,
                              SOCK_DGRAM,
                              port);
-
+  pthread_mutex_init(&mutexTransId, NULL);
   pthread_create(&cleanupThread, NULL, transIDCleanup, (void*)transIDs);
 
   listenConfig.tInst                  = clientData;
