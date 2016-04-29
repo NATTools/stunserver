@@ -20,7 +20,7 @@ ADD . stunserver
 
 RUN \
  buildDeps='build-essential zlib1g-dev git cmake';set -x &&\
- apt-get update && apt-get install -y ca.certificates libssl-dev $buildDeps  --no-install-recommends &&\
+ apt-get update && apt-get install -y ca.certificates libssl-dev libbsd-dev $buildDeps  --no-install-recommends &&\
  rm -rf /var/lib/apt/lists/* &&\
  #git clone http://github.com/NATTools/stunserver.git &&\
  cd stunserver &&\
