@@ -37,6 +37,8 @@ struct transIDInfo {
 };
 uint32_t transIDSinUse;
 uint32_t maxTransIDSinUse = 0;
+uint32_t stun_pkt_cnt = 0;
+uint32_t byte_cnt = 0;
 
 
 struct transIDInfo transIDs[MAX_TRANS_IDS];
@@ -77,7 +79,10 @@ transIDCleanup(void* ptr)
         pthread_mutex_unlock (&mutexTransId);
       }
     }
-    printf("\rActive Transactions: %i  (Max: %i)   ", transIDSinUse, maxTransIDSinUse);
+    printf("\rActive Transactions: %i  (Max: %i)   (Trans/sec: %i, kbps: %i)           ",
+    transIDSinUse, maxTransIDSinUse, stun_pkt_cnt, byte_cnt*8/1000);
+    stun_pkt_cnt = 0;
+    byte_cnt = 0;
     fflush(stdout);
   }
   return NULL;
@@ -146,7 +151,8 @@ stunHandler(struct socketConfig* config,
   STUN_INCOMING_REQ_DATA pReq;
   STUN_CLIENT_DATA*      clientData = (STUN_CLIENT_DATA*)cb;
   char                   realm[STUN_MSG_MAX_REALM_LENGTH];
-
+  stun_pkt_cnt++;
+  byte_cnt += buflen;
 //  printf("Got a STUN message... (%i)\n", buflen);
   stunlib_DecodeMessage(buf, buflen, &stunRequest, NULL, NULL);
   /* printf("Finished decoding..\n"); */
