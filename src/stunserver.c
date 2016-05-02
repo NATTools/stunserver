@@ -147,7 +147,7 @@ stunHandler(struct socketConfig* config,
   STUN_CLIENT_DATA*      clientData = (STUN_CLIENT_DATA*)cb;
   char                   realm[STUN_MSG_MAX_REALM_LENGTH];
 
-  /* printf("Got a STUN message... (%i)\n", buflen); */
+//  printf("Got a STUN message... (%i)\n", buflen);
   stunlib_DecodeMessage(buf, buflen, &stunRequest, NULL, NULL);
   /* printf("Finished decoding..\n"); */
   if (stunRequest.msgHdr.msgType == STUN_MSG_DataIndicationMsg)
@@ -183,7 +183,6 @@ stunHandler(struct socketConfig* config,
     }
   }
 #endif
-
   StunServer_HandleStunIncomingBindReqMsg(clientData,
                                           &pReq,
                                           &stunRequest,
@@ -203,7 +202,6 @@ stunHandler(struct socketConfig* config,
     /* Store some stats.. */
     int32_t num = insertTransId(&stunRequest.msgHdr.id);
 
-
     StunServer_SendConnectivityBindingResp(clientData,
                                            config->sockfd,
                                            stunRequest.msgHdr.id,
@@ -218,6 +216,8 @@ stunHandler(struct socketConfig* config,
                                            false,
                                            200,
                                            NULL);
+  }else{
+    printf("Weird...\n");
   }
 
 }
