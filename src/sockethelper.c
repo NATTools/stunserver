@@ -169,8 +169,11 @@ socketListenDemux(void* ptr)
             perror("recvfrom");
             exit(1);
           }
-          if(pthread_create(&config->threads[config->thread_no], NULL, handleRequest, (void*)request)){
-            printf("Could not create thread for STUN handling.. (%i)\n",config->thread_no++);
+          int pt = pthread_create(&config->threads[config->thread_no], NULL, handleRequest, (void*)request);
+          if(pt){
+            perror("Failed to create thread");
+            printf("Could not create thread for STUN handling.. (Ret:%i num:%i)\n",pt,config->thread_no++);
+            exit(EXIT_FAILURE);
           }else{
             config->thread_no++;
             if(config->thread_no+1>=MAX_THREADS){
