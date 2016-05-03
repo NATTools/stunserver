@@ -109,8 +109,8 @@ void *handleRequest(void *ptr)
                          request->buf,
                          request->numbytes);
    }
-   pthread_exit(NULL);
    free(request);
+   //pthread_exit(NULL);
    return NULL;
 }
 
