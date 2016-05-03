@@ -170,7 +170,7 @@ socketListenDemux(void* ptr)
             exit(1);
           }
           if(pthread_create(&config->threads[config->thread_no], NULL, handleRequest, (void*)request)){
-            printf("Could not create thread for STUN handling..\n");
+            printf("Could not create thread for STUN handling.. (%i)\n",config->thread_no++);
           }else{
             config->thread_no++;
             if(config->thread_no+1>=MAX_THREADS){

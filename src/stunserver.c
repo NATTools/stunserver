@@ -38,7 +38,9 @@ struct transIDInfo {
 uint32_t transIDSinUse;
 uint32_t maxTransIDSinUse = 0;
 uint32_t stun_pkt_cnt = 0;
+uint32_t max_stun_pkt_cnt = 0;
 uint32_t byte_cnt = 0;
+uint32_t max_byte_cnt = 0;
 
 
 struct transIDInfo transIDs[MAX_TRANS_IDS];
@@ -79,8 +81,18 @@ transIDCleanup(void* ptr)
         pthread_mutex_unlock (&mutexTransId);
       }
     }
-    printf("\rActive Transactions: %i  (Max: %i)   (Trans/sec: %i, kbps: %i)           ",
-    transIDSinUse, maxTransIDSinUse, stun_pkt_cnt, byte_cnt*8/1000);
+    if(stun_pkt_cnt>max_stun_pkt_cnt){
+      max_stun_pkt_cnt=stun_pkt_cnt;
+    }
+
+    if(byte_cnt>max_byte_cnt){
+      max_byte_cnt=byte_cnt;
+    }
+    printf("\rActive Transactions: %i  (Max: %i)   (Trans/sec: %i (%i), kbps: %i (%i))           ",
+          transIDSinUse, maxTransIDSinUse, stun_pkt_cnt, max_stun_pkt_cnt,
+          byte_cnt*8/1000, max_byte_cnt*8/1000);
+
+
     stun_pkt_cnt = 0;
     byte_cnt = 0;
     fflush(stdout);
