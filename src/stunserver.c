@@ -165,6 +165,9 @@ transIDCleanup(void* ptr)
     stun_pkt_cnt = 0;
     byte_cnt     = 0;
     fflush(stdout);
+    if(max_stun_pkt_cnt > 0 && transIDSinUse == 0){
+      exit(0);
+    }
   }
   return NULL;
 }
