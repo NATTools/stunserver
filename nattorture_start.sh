@@ -7,6 +7,9 @@ interface="eth0"
 output_file="out.csv"
 test_name="test"
 
+lockfile=nattorture.lock
+touch $lockfile
+
 while getopts "h?i:f:r:o:t:" opt; do
     case "$opt" in
     h|\?)
@@ -30,3 +33,5 @@ shift $((OPTIND-1))
 
 printf "Time, transInUse, maxTransInuse, pkt cnt, max pkt_cnt, byte cnt, max byte cnt, kbps, max kbps, user, nice, system, idle, iowait\n" > $output_file
 build/dist/bin/stunserver -i $interface --csv >> $output_file
+
+rm $lockfile
