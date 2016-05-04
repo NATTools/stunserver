@@ -144,7 +144,8 @@ transIDCleanup(void* ptr)
     cpu_system = b[2]-a[2];
     cpu_idle = b[3]-a[3];
     cpu_iowait = b[4]-a[4];
-    cpu_usage = ((b[0]-a[0]) / (b[2]-a[2]))*100;
+    //cpu_usage = ((b[0]-a[0]) / (b[2]-a[2]))*100;
+    cpu_usage = 0;
     loadavg = ((b[0]+b[1]+b[2]) - (a[0]+a[1]+a[2])) / ((b[0]+b[1]+b[2]+b[3]) - (a[0]+a[1]+a[2]+a[3]));
   }else{
     loadavg =0;
