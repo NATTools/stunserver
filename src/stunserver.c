@@ -42,6 +42,7 @@ uint32_t max_stun_pkt_cnt = 0;
 uint32_t byte_cnt = 0;
 uint32_t max_byte_cnt = 0;
 long double loadavg;
+long double cpu_usage;
 
 bool csv_output;
 
@@ -70,14 +71,15 @@ printCSV(/* arguments */)
 
   printf("%s, ", buf);
 
-  printf("%i, %i, %i, %i, %i, %i, %Lf\n",
+  printf("%i, %i, %i, %i, %i, %i, %Lf, %Lf\n",
         transIDSinUse,
         maxTransIDSinUse,
         stun_pkt_cnt,
         max_stun_pkt_cnt,
         byte_cnt*8/1000,
         max_byte_cnt*8/1000,
-        loadavg);
+        loadavg,
+        cpu_usage);
 }
 
 
@@ -134,6 +136,7 @@ transIDCleanup(void* ptr)
     if(fp){
     fscanf(fp,"%*s %Lf %Lf %Lf %Lf",&b[0],&b[1],&b[2],&b[3]);
     fclose(fp);
+    cpu_usage = ((b[0]-a[0]) / (b[2]-a[2]))*100;
     loadavg = ((b[0]+b[1]+b[2]) - (a[0]+a[1]+a[2])) / ((b[0]+b[1]+b[2]+b[3]) - (a[0]+a[1]+a[2]+a[3]));
   }else{
     loadavg =0;
