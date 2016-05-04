@@ -103,7 +103,7 @@ transIDCleanup(void* ptr)
   {
     fp = fopen("/proc/stat","r");
     if(fp){
-    fscanf(fp,"%*s %llu %llu %llu %llu",&a[1],&a[2],&a[3], &a[4]);
+    fscanf(fp,"%*s %llu %llu %llu %llu %llu",&a[0],&a[1],&a[2],&a[3], &a[4]);
     fclose(fp);
     }
     nanosleep(&timer, &remaining);
