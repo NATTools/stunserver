@@ -37,27 +37,26 @@ struct transIDInfo {
 };
 uint32_t transIDSinUse;
 uint32_t maxTransIDSinUse = 0;
-uint32_t stun_pkt_cnt = 0;
+uint32_t stun_pkt_cnt     = 0;
 uint32_t max_stun_pkt_cnt = 0;
-uint32_t byte_cnt = 0;
-uint32_t max_byte_cnt = 0;
-long double loadavg;
-long double cpu_usage;
+uint32_t byte_cnt         = 0;
+uint32_t max_byte_cnt     = 0;
+
 unsigned long long cpu_user, cpu_nice, cpu_system, cpu_idle, cpu_iowait;
 
 bool csv_output;
 
 struct transIDInfo transIDs[MAX_TRANS_IDS];
-pthread_mutex_t mutexTransId;
+pthread_mutex_t    mutexTransId;
 
 
 static void
 printCSV(/* arguments */)
 {
   struct timeval start;
-  time_t     nowtime;
-  struct tm* nowtm;
-  char       tmbuf[64], buf[64];
+  time_t         nowtime;
+  struct tm*     nowtm;
+  char           tmbuf[64], buf[64];
 
   gettimeofday(&start, NULL);
   /* gettimeofday(&tv, NULL); */
@@ -65,23 +64,21 @@ printCSV(/* arguments */)
   nowtm   = localtime(&nowtime);
   strftime(tmbuf, sizeof tmbuf, "%Y-%m-%d %H:%M:%S", nowtm);
   #ifdef __APPLE__
-  snprintf(buf, sizeof buf, "%s.%06d", tmbuf, start.tv_usec);
+  snprintf(buf, sizeof buf, "%s.%06d",  tmbuf, start.tv_usec);
   #else
   snprintf(buf, sizeof buf, "%s.%06ld", tmbuf, start.tv_usec);
   #endif
 
   printf("%s, ", buf);
 
-  printf("%i, %i, %i, %i, %i, %i, %llu, %llu, %llu, %llu, %llu, %Lf, %Lf\n",
-        transIDSinUse,
-        maxTransIDSinUse,
-        stun_pkt_cnt,
-        max_stun_pkt_cnt,
-        byte_cnt*8/1000,
-        max_byte_cnt*8/1000,
-        cpu_user, cpu_nice, cpu_system, cpu_idle, cpu_iowait,
-        loadavg,
-        cpu_usage);
+  printf("%i, %i, %i, %i, %i, %i, %llu, %llu, %llu, %llu, %llu\n",
+         transIDSinUse,
+         maxTransIDSinUse,
+         stun_pkt_cnt,
+         max_stun_pkt_cnt,
+         byte_cnt * 8 / 1000,
+         max_byte_cnt * 8 / 1000,
+         cpu_user, cpu_nice, cpu_system, cpu_idle, cpu_iowait);
 }
 
 
@@ -93,8 +90,8 @@ transIDCleanup(void* ptr)
   struct timespec remaining;
   (void) ptr;
   unsigned long long a[5], b[5];
-  //char str[7];
-  FILE *fp;
+  /* char str[7]; */
+  FILE* fp;
 
   timer.tv_sec  = 1;
   timer.tv_nsec = 00000000;
@@ -102,9 +99,10 @@ transIDCleanup(void* ptr)
   for (;; )
   {
     fp = fopen("/proc/stat","r");
-    if(fp){
-    fscanf(fp,"%*s %llu %llu %llu %llu %llu",&a[0],&a[1],&a[2],&a[3], &a[4]);
-    fclose(fp);
+    if (fp)
+    {
+      fscanf(fp,"%*s %llu %llu %llu %llu %llu",&a[0],&a[1],&a[2],&a[3], &a[4]);
+      fclose(fp);
     }
     nanosleep(&timer, &remaining);
     for (uint32_t i = 0; i < transIDSinUse; i++)
@@ -112,55 +110,60 @@ transIDCleanup(void* ptr)
       if (transIDs[i].cnt > 12)
       {
         /* To old remove it.. */
-        pthread_mutex_lock (&mutexTransId);
+        pthread_mutex_lock(&mutexTransId);
         for (uint32_t j = i + 1; j < transIDSinUse; j++)
         {
           memcpy( &transIDs[j - 1], &transIDs[j], sizeof(struct transIDInfo) );
         }
         transIDSinUse--;
-        pthread_mutex_unlock (&mutexTransId);
+        pthread_mutex_unlock(&mutexTransId);
       }
       else
       {
-        pthread_mutex_lock (&mutexTransId);
+        pthread_mutex_lock(&mutexTransId);
         transIDs[i].cnt++;
-        pthread_mutex_unlock (&mutexTransId);
+        pthread_mutex_unlock(&mutexTransId);
       }
     }
-    if(stun_pkt_cnt>max_stun_pkt_cnt){
-      max_stun_pkt_cnt=stun_pkt_cnt;
+    if (stun_pkt_cnt > max_stun_pkt_cnt)
+    {
+      max_stun_pkt_cnt = stun_pkt_cnt;
     }
 
-    if(byte_cnt>max_byte_cnt){
-      max_byte_cnt=byte_cnt;
+    if (byte_cnt > max_byte_cnt)
+    {
+      max_byte_cnt = byte_cnt;
     }
 
     fp = fopen("/proc/stat","r");
-    if(fp){
-    fscanf(fp,"%*s %llu %llu %llu %llu %llu",&b[0],&b[1],&b[2],&b[3],&b[4]);
-    fclose(fp);
-    cpu_user = b[0]-a[0];
-    cpu_nice = b[1]-a[1];
-    cpu_system = b[2]-a[2];
-    cpu_idle = b[3]-a[3];
-    cpu_iowait = b[4]-a[4];
-    //cpu_usage = ((b[0]-a[0]) / (b[2]-a[2]))*100;
-    cpu_usage = 0;
-    loadavg = ((b[0]+b[1]+b[2]) - (a[0]+a[1]+a[2])) / ((b[0]+b[1]+b[2]+b[3]) - (a[0]+a[1]+a[2]+a[3]));
-  }else{
-    loadavg =0;
-  }
-
-    if(csv_output){
+    if (fp)
+    {
+      fscanf(fp,"%*s %llu %llu %llu %llu %llu",&b[0],&b[1],&b[2],&b[3],&b[4]);
+      fclose(fp);
+      cpu_user   = b[0] - a[0];
+      cpu_nice   = b[1] - a[1];
+      cpu_system = b[2] - a[2];
+      cpu_idle   = b[3] - a[3];
+      cpu_iowait = b[4] - a[4];
+    }
+    if (csv_output)
+    {
       printCSV();
-    }else{
-      printf("\rActive Transactions: %i  (Max: %i)   (Trans/sec: %i (%i), kbps: %i (%i))           ",
-          transIDSinUse, maxTransIDSinUse, stun_pkt_cnt, max_stun_pkt_cnt,
-          byte_cnt*8/1000, max_byte_cnt*8/1000);
+    }
+    else
+    {
+      printf(
+        "\rActive Transactions: %i  (Max: %i)   (Trans/sec: %i (%i), kbps: %i (%i))           ",
+        transIDSinUse,
+        maxTransIDSinUse,
+        stun_pkt_cnt,
+        max_stun_pkt_cnt,
+        byte_cnt * 8 / 1000,
+        max_byte_cnt * 8 / 1000);
     }
 
     stun_pkt_cnt = 0;
-    byte_cnt = 0;
+    byte_cnt     = 0;
     fflush(stdout);
   }
   return NULL;
@@ -191,21 +194,22 @@ insertTransId(const StunMsgId* id)
   {
     if ( stunlib_transIdIsEqual(id, &transIDs[i].id) )
     {
-      pthread_mutex_lock (&mutexTransId);
+      pthread_mutex_lock(&mutexTransId);
       transIDs[i].cnt++;
-      pthread_mutex_unlock (&mutexTransId);
+      pthread_mutex_unlock(&mutexTransId);
       return transIDs[i].cnt;
     }
   }
-  pthread_mutex_lock (&mutexTransId);
+  pthread_mutex_lock(&mutexTransId);
   memcpy( &transIDs[transIDSinUse].id, id, sizeof (StunMsgId) );
   transIDs[transIDSinUse].cnt  = 1;
   transIDs[transIDSinUse].tick = 0;
   transIDSinUse++;
-  if(transIDSinUse>maxTransIDSinUse){
+  if (transIDSinUse > maxTransIDSinUse)
+  {
     maxTransIDSinUse = transIDSinUse;
   }
-  pthread_mutex_unlock (&mutexTransId);
+  pthread_mutex_unlock(&mutexTransId);
   return 1;
 }
 
@@ -231,7 +235,7 @@ stunHandler(struct socketConfig* config,
   char                   realm[STUN_MSG_MAX_REALM_LENGTH];
   stun_pkt_cnt++;
   byte_cnt += buflen;
-//  printf("Got a STUN message... (%i)\n", buflen);
+/*  printf("Got a STUN message... (%i)\n", buflen); */
   stunlib_DecodeMessage(buf, buflen, &stunRequest, NULL, NULL);
   /* printf("Finished decoding..\n"); */
   if (stunRequest.msgHdr.msgType == STUN_MSG_DataIndicationMsg)
@@ -273,13 +277,13 @@ stunHandler(struct socketConfig* config,
                                           false);
 
 
-  uint32_t lastReqCnt  = 0;
-  //uint32_t lastRespCnt = 0;
+  uint32_t lastReqCnt = 0;
+  /* uint32_t lastRespCnt = 0; */
 
   if (stunRequest.hasTransCount)
   {
-    lastReqCnt  = stunRequest.transCount.reqCnt;
-    //lastRespCnt = stunRequest.transCount.respCnt;
+    lastReqCnt = stunRequest.transCount.reqCnt;
+    /* lastRespCnt = stunRequest.transCount.respCnt; */
   }
   if (lastReqCnt >= upstream_loss)
   {
@@ -300,7 +304,9 @@ stunHandler(struct socketConfig* config,
                                            false,
                                            200,
                                            NULL);
-  }else{
+  }
+  else
+  {
     printf("Weird...\n");
   }
 
