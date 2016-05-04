@@ -41,10 +41,44 @@ uint32_t stun_pkt_cnt = 0;
 uint32_t max_stun_pkt_cnt = 0;
 uint32_t byte_cnt = 0;
 uint32_t max_byte_cnt = 0;
+long double loadavg;
 
+bool csv_output;
 
 struct transIDInfo transIDs[MAX_TRANS_IDS];
 pthread_mutex_t mutexTransId;
+
+
+static void
+printCSV(/* arguments */)
+{
+  struct timeval start;
+  time_t     nowtime;
+  struct tm* nowtm;
+  char       tmbuf[64], buf[64];
+
+  gettimeofday(&start, NULL);
+  /* gettimeofday(&tv, NULL); */
+  nowtime = start.tv_sec;
+  nowtm   = localtime(&nowtime);
+  strftime(tmbuf, sizeof tmbuf, "%Y-%m-%d %H:%M:%S", nowtm);
+  #ifdef __APPLE__
+  snprintf(buf, sizeof buf, "%s.%06d", tmbuf, start.tv_usec);
+  #else
+  snprintf(buf, sizeof buf, "%s.%06ld", tmbuf, start.tv_usec);
+  #endif
+
+  printf("%s, ", buf);
+
+  printf("%i, %i, %i, %i, %i, %i, %Lf\n",
+        transIDSinUse,
+        maxTransIDSinUse,
+        stun_pkt_cnt,
+        max_stun_pkt_cnt,
+        byte_cnt*8/1000,
+        max_byte_cnt*8/1000,
+        loadavg);
+}
 
 
 /*Todo: If we really care protect the variables by a mutex...*/
@@ -54,12 +88,17 @@ transIDCleanup(void* ptr)
   struct timespec timer;
   struct timespec remaining;
   (void) ptr;
+  long double a[4], b[4];
+  FILE *fp;
 
   timer.tv_sec  = 1;
   timer.tv_nsec = 00000000;
 
   for (;; )
   {
+    fp = fopen("/proc/stat","r");
+    fscanf(fp,"%*s %Lf %Lf %Lf %Lf",&a[0],&a[1],&a[2],&a[3]);
+    fclose(fp);
     nanosleep(&timer, &remaining);
     for (uint32_t i = 0; i < transIDSinUse; i++)
     {
@@ -88,10 +127,18 @@ transIDCleanup(void* ptr)
     if(byte_cnt>max_byte_cnt){
       max_byte_cnt=byte_cnt;
     }
-    printf("\rActive Transactions: %i  (Max: %i)   (Trans/sec: %i (%i), kbps: %i (%i))           ",
+
+    fp = fopen("/proc/stat","r");
+    fscanf(fp,"%*s %Lf %Lf %Lf %Lf",&b[0],&b[1],&b[2],&b[3]);
+    fclose(fp);
+    loadavg = ((b[0]+b[1]+b[2]) - (a[0]+a[1]+a[2])) / ((b[0]+b[1]+b[2]+b[3]) - (a[0]+a[1]+a[2]+a[3]));
+    if(csv_output){
+      printCSV();
+    }else{
+      printf("\rActive Transactions: %i  (Max: %i)   (Trans/sec: %i (%i), kbps: %i (%i))           ",
           transIDSinUse, maxTransIDSinUse, stun_pkt_cnt, max_stun_pkt_cnt,
           byte_cnt*8/1000, max_byte_cnt*8/1000);
-
+    }
 
     stun_pkt_cnt = 0;
     byte_cnt = 0;
@@ -248,6 +295,7 @@ printUsage()
   printf("  -i, --interface               Interface\n");
   printf("  -p, --port                    Listen port\n");
   printf("  -u, --upstream                Upstream losst\n");
+  printf("  --cvs                         CVS stat output\n");
   printf("  -v, --version                 Prints version number\n");
   printf("  -h, --help                    Print help text\n");
   exit(0);
@@ -292,6 +340,7 @@ main(int   argc,
     {"interface", 1, 0, 'i'},
     {"port", 1, 0, 'p'},
     {"upstream", 1, 0, 'u'},
+    {"csv", 0, 0, '2'},
     {"help", 0, 0, 'h'},
     {"version", 0, 0, 'v'},
     {NULL, 0, NULL, 0}
@@ -316,6 +365,9 @@ main(int   argc,
       break;
     case 'u':
       upstream_loss = atoi(optarg);
+      break;
+    case '2':
+      csv_output = true;
       break;
     case 'h':
       printUsage();
@@ -360,9 +412,6 @@ main(int   argc,
                  NULL,
                  socketListenDemux,
                  (void*)&listenConfig);
+  pause();
 
-  while (1)
-  {
-    sleep(1000);
-  }
 }
