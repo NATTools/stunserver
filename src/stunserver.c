@@ -43,6 +43,7 @@ uint32_t byte_cnt = 0;
 uint32_t max_byte_cnt = 0;
 long double loadavg;
 long double cpu_usage;
+uint32_t cpu_user, cpu_nice, cpu_system, cpu_idle, cpu_iowait;
 
 bool csv_output;
 
@@ -71,13 +72,14 @@ printCSV(/* arguments */)
 
   printf("%s, ", buf);
 
-  printf("%i, %i, %i, %i, %i, %i, %Lf, %Lf\n",
+  printf("%i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %Lf, %Lf\n",
         transIDSinUse,
         maxTransIDSinUse,
         stun_pkt_cnt,
         max_stun_pkt_cnt,
         byte_cnt*8/1000,
         max_byte_cnt*8/1000,
+        cpu_user, cpu_nice, cpu_system, cpu_idle, cpu_iowait,
         loadavg,
         cpu_usage);
 }
@@ -90,7 +92,8 @@ transIDCleanup(void* ptr)
   struct timespec timer;
   struct timespec remaining;
   (void) ptr;
-  long double a[4], b[4];
+  long double a[5], b[5];
+  //char str[7];
   FILE *fp;
 
   timer.tv_sec  = 1;
@@ -100,7 +103,7 @@ transIDCleanup(void* ptr)
   {
     fp = fopen("/proc/stat","r");
     if(fp){
-    fscanf(fp,"%*s %Lf %Lf %Lf %Lf",&a[0],&a[1],&a[2],&a[3]);
+    fscanf(fp,"%*s %Lf %Lf %Lf %Lf %Lf",&a[0],&a[1],&a[2],&a[3], &a[4]);
     fclose(fp);
     }
     nanosleep(&timer, &remaining);
@@ -134,8 +137,13 @@ transIDCleanup(void* ptr)
 
     fp = fopen("/proc/stat","r");
     if(fp){
-    fscanf(fp,"%*s %Lf %Lf %Lf %Lf",&b[0],&b[1],&b[2],&b[3]);
+    fscanf(fp,"%*s %Lf %Lf %Lf %Lf %Lf",&b[0],&b[1],&b[2],&b[3],&b[3]);
     fclose(fp);
+    cpu_user = b[0]-a[0];
+    cpu_nice = b[1]-a[1];
+    cpu_system = b[2]-a[2];
+    cpu_idle = b[3]-a[3];
+    cpu_iowait = b[4]-a[4];
     cpu_usage = ((b[0]-a[0]) / (b[2]-a[2]))*100;
     loadavg = ((b[0]+b[1]+b[2]) - (a[0]+a[1]+a[2])) / ((b[0]+b[1]+b[2]+b[3]) - (a[0]+a[1]+a[2]+a[3]));
   }else{
