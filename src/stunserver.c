@@ -43,7 +43,7 @@ uint32_t byte_cnt = 0;
 uint32_t max_byte_cnt = 0;
 long double loadavg;
 long double cpu_usage;
-uint32_t cpu_user, cpu_nice, cpu_system, cpu_idle, cpu_iowait;
+unsigned long long cpu_user, cpu_nice, cpu_system, cpu_idle, cpu_iowait;
 
 bool csv_output;
 
@@ -72,7 +72,7 @@ printCSV(/* arguments */)
 
   printf("%s, ", buf);
 
-  printf("%i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %Lf, %Lf\n",
+  printf("%i, %i, %i, %i, %i, %i, %llu, %llu, %llu, %llu, %llu, %Lf, %Lf\n",
         transIDSinUse,
         maxTransIDSinUse,
         stun_pkt_cnt,
