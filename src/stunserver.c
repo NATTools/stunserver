@@ -92,7 +92,7 @@ transIDCleanup(void* ptr)
   struct timespec timer;
   struct timespec remaining;
   (void) ptr;
-  long double a[5], b[5];
+  uint32_t a[5], b[5];
   //char str[7];
   FILE *fp;
 
@@ -103,7 +103,7 @@ transIDCleanup(void* ptr)
   {
     fp = fopen("/proc/stat","r");
     if(fp){
-    fscanf(fp,"%*s %Lf %Lf %Lf %Lf %Lf",&a[0],&a[1],&a[2],&a[3], &a[4]);
+    fscanf(fp,"%*s %ui %ui %ui %ui %ui",&a[0],&a[1],&a[2],&a[3], &a[4]);
     fclose(fp);
     }
     nanosleep(&timer, &remaining);
@@ -137,7 +137,7 @@ transIDCleanup(void* ptr)
 
     fp = fopen("/proc/stat","r");
     if(fp){
-    fscanf(fp,"%*s %Lf %Lf %Lf %Lf %Lf",&b[0],&b[1],&b[2],&b[3],&b[3]);
+    fscanf(fp,"%*s %ui %ui %ui %ui %ui",&b[0],&b[1],&b[2],&b[3],&b[4]);
     fclose(fp);
     cpu_user = b[0]-a[0];
     cpu_nice = b[1]-a[1];
