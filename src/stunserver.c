@@ -97,8 +97,10 @@ transIDCleanup(void* ptr)
   for (;; )
   {
     fp = fopen("/proc/stat","r");
+    if(fp){
     fscanf(fp,"%*s %Lf %Lf %Lf %Lf",&a[0],&a[1],&a[2],&a[3]);
     fclose(fp);
+    }
     nanosleep(&timer, &remaining);
     for (uint32_t i = 0; i < transIDSinUse; i++)
     {
@@ -129,9 +131,14 @@ transIDCleanup(void* ptr)
     }
 
     fp = fopen("/proc/stat","r");
+    if(fp){
     fscanf(fp,"%*s %Lf %Lf %Lf %Lf",&b[0],&b[1],&b[2],&b[3]);
     fclose(fp);
     loadavg = ((b[0]+b[1]+b[2]) - (a[0]+a[1]+a[2])) / ((b[0]+b[1]+b[2]+b[3]) - (a[0]+a[1]+a[2]+a[3]));
+  }else{
+    loadavg =0;
+  }
+
     if(csv_output){
       printCSV();
     }else{
@@ -295,7 +302,7 @@ printUsage()
   printf("  -i, --interface               Interface\n");
   printf("  -p, --port                    Listen port\n");
   printf("  -u, --upstream                Upstream losst\n");
-  printf("  --cvs                         CVS stat output\n");
+  printf("  --csv                         CVS stat output\n");
   printf("  -v, --version                 Prints version number\n");
   printf("  -h, --help                    Print help text\n");
   exit(0);
@@ -351,7 +358,7 @@ main(int   argc,
     exit(0);
   }
   int option_index = 0;
-  while ( ( c = getopt_long(argc, argv, "hvi:p:j:m:M:w:r:u:",
+  while ( ( c = getopt_long(argc, argv, "h2vi:p:m:u:",
                             long_options, &option_index) ) != -1 )
   {
     /* int this_option_optind = optind ? optind : 1; */
