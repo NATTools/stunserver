@@ -92,7 +92,7 @@ transIDCleanup(void* ptr)
   struct timespec timer;
   struct timespec remaining;
   (void) ptr;
-  uint64_t a[5], b[5];
+  unsigned long long a[5], b[5];
   //char str[7];
   FILE *fp;
 
@@ -103,7 +103,7 @@ transIDCleanup(void* ptr)
   {
     fp = fopen("/proc/stat","r");
     if(fp){
-    fscanf(fp,"%*s %llu %llu %llu %llu %llu",&a[0],&a[1],&a[2],&a[3], &a[4]);
+    fscanf(fp,"%*s %llu %llu %llu %llu",&a[1],&a[2],&a[3], &a[4]);
     fclose(fp);
     }
     nanosleep(&timer, &remaining);
