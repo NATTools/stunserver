@@ -10,8 +10,9 @@
 
 #include <stunlib.h>
 
-#define MAXBUFLEN 4048
-#define MAX_LISTEN_SOCKETS 10
+#define MAXBUFLEN 1500
+#define MAX_LISTEN_SOCKETS 1
+#define MAX_THREADS 100000
 
 
 struct socketConfig {
@@ -23,10 +24,28 @@ struct socketConfig {
 };
 
 
+
+struct Request {
+  unsigned char           buf[MAXBUFLEN];
+  socklen_t               addr_len;
+  struct sockaddr_storage their_addr;
+  int                     numbytes;
+  struct socketConfig*    socketConfig;
+
+  void (* stun_handler)(struct socketConfig*,
+                        struct sockaddr*,
+                        void*,
+                        unsigned char*,
+                        int);
+  void* tInst;
+};
+
 struct listenConfig {
   void*               tInst;
   struct socketConfig socketConfig[MAX_LISTEN_SOCKETS];
   int                 numSockets;
+  pthread_t           threads[MAX_THREADS];
+  int                 thread_no;
   /*Handles normal data like RTP etc */
   void (* icmp_handler)(struct socketConfig*,
                         struct sockaddr*,
