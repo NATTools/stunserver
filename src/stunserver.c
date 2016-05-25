@@ -165,7 +165,8 @@ transIDCleanup(void* ptr)
     stun_pkt_cnt = 0;
     byte_cnt     = 0;
     fflush(stdout);
-    if(max_stun_pkt_cnt > 0 && transIDSinUse == 0){
+    if ( (max_stun_pkt_cnt > 0) && (transIDSinUse == 0) )
+    {
       exit(0);
     }
   }
@@ -232,10 +233,16 @@ stunHandler(struct socketConfig* config,
             unsigned char*       buf,
             int                  buflen)
 {
-  StunMessage            stunRequest;
-  STUN_INCOMING_REQ_DATA pReq;
-  STUN_CLIENT_DATA*      clientData = (STUN_CLIENT_DATA*)cb;
-  char                   realm[STUN_MSG_MAX_REALM_LENGTH];
+  StunMessage stunRequest;
+  /* STUN_INCOMING_REQ_DATA pReq; */
+  STUN_CLIENT_DATA* clientData = (STUN_CLIENT_DATA*)cb;
+  char              realm[STUN_MSG_MAX_REALM_LENGTH];
+  uint8_t           enf_flags            = 0;
+  uint8_t           enf_nodeCnt          = 0;
+  uint16_t          enf_upMaxBandwidth   = 0;
+  uint16_t          enf_downMaxBandwidth = 0;
+
+
   stun_pkt_cnt++;
   byte_cnt += buflen;
 /*  printf("Got a STUN message... (%i)\n", buflen); */
@@ -256,28 +263,33 @@ stunHandler(struct socketConfig* config,
     memcpy(&realm, stunRequest.realm.value, STUN_MSG_MAX_REALM_LENGTH);
   }
 
-#if 0
+  if (stunRequest.hasEnfNetworkStatus)
+  {
+    enf_flags            = stunRequest.enfNetworkStatusResp.flags;
+    enf_nodeCnt          = stunRequest.enfNetworkStatusResp.nodeCnt;
+    enf_upMaxBandwidth   = stunRequest.enfNetworkStatusResp.upMaxBandwidth;
+    enf_downMaxBandwidth = stunRequest.enfNetworkStatusResp.downMaxBandwidth;
+  }
+
+
   if (stunRequest.hasMessageIntegrity)
   {
     printf("Checking integrity..%s\n", config->pass);
-    if ( stunlib_checkIntegrity( buf,
-                                 buflen,
-                                 &stunRequest,
-                                 (uint8_t*)config->pass,
-                                 strlen(config->pass) ) )
-    {
-      printf("     - Integrity check OK\n");
-    }
-    else
+    if ( !stunlib_checkIntegrity( buf,
+                                  buflen,
+                                  &stunRequest,
+                                  (uint8_t*)config->pass,
+                                  strlen(config->pass) ) )
     {
       printf("     - Integrity check NOT OK\n");
+      return;
     }
   }
-#endif
-  StunServer_HandleStunIncomingBindReqMsg(clientData,
-                                          &pReq,
-                                          &stunRequest,
-                                          false);
+/* #endif */
+/* StunServer_HandleStunIncomingBindReqMsg(clientData, */
+/*                                        &pReq, */
+/*                                        &stunRequest, */
+/*                                        false); */
 
 
   uint32_t lastReqCnt = 0;
@@ -301,12 +313,15 @@ stunHandler(struct socketConfig* config,
                                            from_addr,
                                            lastReqCnt,
                                            num,
+                                           enf_flags,
+                                           enf_nodeCnt + 1,
+                                           enf_upMaxBandwidth,
+                                           enf_downMaxBandwidth,
                                            NULL,
                                            sendPacket,
                                            SOCK_DGRAM,
                                            false,
-                                           200,
-                                           NULL);
+                                           200);
   }
   else
   {

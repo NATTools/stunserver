@@ -25,27 +25,27 @@ struct socketConfig {
 
 
 
-struct Request{
+struct Request {
   unsigned char           buf[MAXBUFLEN];
   socklen_t               addr_len;
   struct sockaddr_storage their_addr;
   int                     numbytes;
-  struct socketConfig     *socketConfig;
+  struct socketConfig*    socketConfig;
 
   void (* stun_handler)(struct socketConfig*,
                         struct sockaddr*,
                         void*,
                         unsigned char*,
                         int);
-  void*               tInst;
+  void* tInst;
 };
 
 struct listenConfig {
   void*               tInst;
   struct socketConfig socketConfig[MAX_LISTEN_SOCKETS];
   int                 numSockets;
-  pthread_t threads[MAX_THREADS];
-  int thread_no;
+  pthread_t           threads[MAX_THREADS];
+  int                 thread_no;
   /*Handles normal data like RTP etc */
   void (* icmp_handler)(struct socketConfig*,
                         struct sockaddr*,

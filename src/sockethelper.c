@@ -96,46 +96,47 @@ createLocalSocket(int                    ai_family,
   return sockfd;
 }
 
-void *handleRequest(void *ptr)
+void*
+handleRequest(void* ptr)
 {
-  struct Request *request = (struct Request*)ptr;
+  struct Request* request = (struct Request*)ptr;
   if ( stunlib_isStunMsg(request->buf, request->numbytes) )
   {
     /* Send to STUN, with CB to data handler if STUN packet contations
      * DATA */
     request->stun_handler(request->socketConfig,
-                         (struct sockaddr*)&request->their_addr,
-                         request->tInst,
-                         request->buf,
-                         request->numbytes);
-   }
-   free(request);
-   //pthread_exit(NULL);
-   return NULL;
+                          (struct sockaddr*)&request->their_addr,
+                          request->tInst,
+                          request->buf,
+                          request->numbytes);
+  }
+  free(request);
+  /* pthread_exit(NULL); */
+  return NULL;
 }
 
 void*
 socketListenDemux(void* ptr)
 {
-  struct pollfd           ufds[10];
-  struct listenConfig*    config = (struct listenConfig*)ptr;
-  //struct sockaddr_storage their_addr;
-  //unsigned char           buf[MAXBUFLEN];
-  //socklen_t               addr_len;
-  int                     rv;
-  //int                     numbytes;
-  int                     i;
+  struct pollfd        ufds[10];
+  struct listenConfig* config = (struct listenConfig*)ptr;
+  /* struct sockaddr_storage their_addr; */
+  /* unsigned char           buf[MAXBUFLEN]; */
+  /* socklen_t               addr_len; */
+  int rv;
+  /* int                     numbytes; */
+  int i;
 
   /* int  keyLen = 16; */
   /* char md5[keyLen]; */
-  config->thread_no =0;
+  config->thread_no = 0;
   for (i = 0; i < config->numSockets; i++)
   {
     ufds[i].fd     = config->socketConfig[i].sockfd;
     ufds[i].events = POLLIN;
   }
 
-  //
+  /*  */
 
   while (1)
   {
@@ -155,11 +156,11 @@ socketListenDemux(void* ptr)
       {
         if (ufds[i].revents & POLLIN)
         {
-          struct Request *request = malloc(sizeof(struct Request));
+          struct Request* request = malloc( sizeof(struct Request) );
           request->socketConfig = &config->socketConfig[i];
-          request->tInst = config->tInst;
+          request->tInst        = config->tInst;
           request->stun_handler = config->stun_handler;
-          request->addr_len = sizeof request->their_addr;
+          request->addr_len     = sizeof request->their_addr;
           if ( ( request->numbytes =
                    recvfrom(request->socketConfig->sockfd,
                             request->buf, MAXBUFLEN, 0,
@@ -169,15 +170,26 @@ socketListenDemux(void* ptr)
             perror("recvfrom");
             exit(1);
           }
-          int pt = pthread_create(&config->threads[config->thread_no], NULL, handleRequest, (void*)request);
-          if(pt){
+          int pt = pthread_create(&config->threads[config->thread_no],
+                                  NULL,
+                                  handleRequest,
+                                  (void*)request);
+          if (pt)
+          {
             perror("Failed to create thread");
-            printf("Could not create thread for STUN handling.. (Ret:%i num:%i)\n",pt,config->thread_no++);
+            printf(
+              "Could not create thread for STUN handling.. (Ret:%i num:%i)\n",
+              pt,
+              config->thread_no++);
             exit(EXIT_FAILURE);
-          }else{
+          }
+          else
+          {
             config->thread_no++;
-            if(config->thread_no+1>=MAX_THREADS){
-              //We roll over.. Hopefully the old threads are finished by now..
+            if (config->thread_no + 1 >= MAX_THREADS)
+            {
+              /* We roll over.. Hopefully the old threads are finished by now..
+               * */
               config->thread_no = 0;
 
             }
